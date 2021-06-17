@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;sun-work-space.github.io&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Gemini&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}</script><script src="/js/config.js"></script>
+<meta name="description" content="微服务 SpringCloud Alibaba 实践微服务架构分析及发展背景分析讲微服务之前，我们先分析以下单体应用。所谓单体应用一般是基于 idea&#x2F;eclipse， maven 等建一个工程，然后基于 SpringBoot，spring，mybatis 框架进行整合，接下来再 写一堆 dao、mapper、service、controller，再加上一些的配置文件，有可能还会引入 redis、">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微服务SpringCloud Alibaba实践">
+<meta property="og:url" content="https://sun-work-space.github.io/2021/06/17/%E5%BE%AE%E6%9C%8D%E5%8A%A1SpringCloud%20Alibaba%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="Technology Stack">
+<meta property="og:description" content="微服务 SpringCloud Alibaba 实践微服务架构分析及发展背景分析讲微服务之前，我们先分析以下单体应用。所谓单体应用一般是基于 idea&#x2F;eclipse， maven 等建一个工程，然后基于 SpringBoot，spring，mybatis 框架进行整合，接下来再 写一堆 dao、mapper、service、controller，再加上一些的配置文件，有可能还会引入 redis、">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sun-work-space.github.io/.io//VUE总结/images/picture2.png">
+<meta property="article:published_time" content="2021-06-17T00:39:20.000Z">
+<meta property="article:modified_time" content="2021-06-17T00:40:44.702Z">
+<meta property="article:author" content="Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://sun-work-space.github.io/.io//VUE总结/images/picture2.png">
+
+
+<link rel="canonical" href="https://sun-work-space.github.io/2021/06/17/%E5%BE%AE%E6%9C%8D%E5%8A%A1SpringCloud%20Alibaba%E5%AE%9E%E8%B7%B5/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;https:&#x2F;&#x2F;sun-work-space.github.io&#x2F;2021&#x2F;06&#x2F;17&#x2F;%E5%BE%AE%E6%9C%8D%E5%8A%A1SpringCloud%20Alibaba%E5%AE%9E%E8%B7%B5&#x2F;&quot;,&quot;path&quot;:&quot;2021&#x2F;06&#x2F;17&#x2F;微服务SpringCloud Alibaba实践&#x2F;&quot;,&quot;title&quot;:&quot;微服务SpringCloud Alibaba实践&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>微服务SpringCloud Alibaba实践 | Technology Stack</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Technology Stack</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1-SpringCloud-Alibaba-%E5%AE%9E%E8%B7%B5"><span class="nav-number">1.</span> <span class="nav-text">微服务 SpringCloud Alibaba 实践</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%86%E6%9E%90%E5%8F%8A%E5%8F%91%E5%B1%95"><span class="nav-number">1.1.</span> <span class="nav-text">微服务架构分析及发展</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF%E5%88%86%E6%9E%90"><span class="nav-number">1.1.1.</span> <span class="nav-text">背景分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.1.2.</span> <span class="nav-text">什么是微服务</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-Cloud-Alibaba-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">2.</span> <span class="nav-text">Spring Cloud Alibaba 解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">2.0.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="nav-number">2.0.2.</span> <span class="nav-text">核心组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.0.3.</span> <span class="nav-text">解决方案架构设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83-Nacos-%E5%BA%94%E7%94%A8%E5%AE%9E%E8%B7%B5"><span class="nav-number">2.1.</span> <span class="nav-text">服务注册中心 Nacos 应用实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF%E5%88%86%E6%9E%90-1"><span class="nav-number">2.1.1.</span> <span class="nav-text">背景分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAP%E5%8E%9F%E5%88%99"><span class="nav-number">2.1.2.</span> <span class="nav-text">CAP原则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E5%BB%BANacos%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.2.</span> <span class="nav-text">构建Nacos服务</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Sun"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Sun-Work-Space" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Sun-Work-Space" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sun-work-space.github.io/2021/06/17/%E5%BE%AE%E6%9C%8D%E5%8A%A1SpringCloud%20Alibaba%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Sun">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Technology Stack">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          微服务SpringCloud Alibaba实践
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-06-17 08:39:20 / 修改时间：08:40:44" itemprop="dateCreated datePublished" datetime="2021-06-17T08:39:20+08:00">2021-06-17</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="微服务-SpringCloud-Alibaba-实践"><a href="#微服务-SpringCloud-Alibaba-实践" class="headerlink" title="微服务 SpringCloud Alibaba 实践"></a>微服务 SpringCloud Alibaba 实践</h1><h2 id="微服务架构分析及发展"><a href="#微服务架构分析及发展" class="headerlink" title="微服务架构分析及发展"></a>微服务架构分析及发展</h2><h3 id="背景分析"><a href="#背景分析" class="headerlink" title="背景分析"></a>背景分析</h3><p>讲微服务之前，我们先分析以下单体应用。所谓单体应用一般是基于 idea/eclipse， maven 等建一个工程，然后基于 SpringBoot，spring，mybatis 框架进行整合，接下来再 写一堆 dao、mapper、service、controller，再加上一些的配置文件，有可能还会引入 redis、elasticsearch、mq 等其它项目的依赖，开发好之后再将项目打包成一个 jar 包 /war 包。然后再将包扔到类似 tomcat 这样的 web 服务中，最后部署到公司提供给你的 linux 服务器上。接下来，你针对服务提供的访问端口（例如 8080 端口）发起 http 请求， 请求会由 tomcat 直接转交给你的 spring web 组件，进行一层一层的代码调用。对于这样 的设计一般适合企业的内部应用，访问量不大，体积比较小，5 人以内的团队即可开发和维 护。但对于一些大型互联网项目，假如需要 10 人以上的开发和维护团队，仅频繁的创建代 码分支，编写业务功能，然后合并分支，就会出现很多代码冲突。每次解决这些大量的代码 冲突，可能就会耗费好几天的时间。总之对于大型的单体应用可能存在的如下几个问题： </p>
+<p>（1）很多人维护一个单块应用，频繁的进行代码合并，频繁的解决代码冲突，解决冲 突的时间和成本很高的，导致开发效率低下。 </p>
+<p>（2）每次上线都要跟最新代码进行合并，重新进行全量功能的回归测试，很多代码都 可能有变动，必须全量回归测试，耗费时间很多，开发效率低下。 </p>
+<p>（3）多人频繁上线，你等我，我等你，互相协调困难，而且可能会出现别人多次先上 线，你多次重复的合并代码，解决冲突，全量回归测试，做很多次重复的事情，导致效率低 下 </p>
+<p>（4）测试服务器都很少，就一台测试服务器，你开发好了代码，你连测试都不能测， 必须等待别人的分支先测试完毕上线，你才能去合并代码，解决冲突，等到一个测试环境可 以用，回归测试。 </p>
+<p>（5）10 个人以内维护一个单块应用，基本这些成本还不算太大，但是一旦 10 人以上 维护一个单块应用，上述的成本会极大，导致系统每个需求的测试和上线，都非常缓慢，要 耗费大量时间做全量回归测试，上线日期还得互相配合互相等待互相协调，一个疏忽，就可 能导致没侧测试完全的代码上线出线上事故。</p>
+<p>（6）如果你想要升级技术架构，不能随意升级，因为可能影响别人，你得让所有人都 学习这个新技术架构才行；如果你想要升级已有技术的版本，不能随意升级，因为可能新版 本对你的代码没影响，但是对别人的代码有影响。</p>
+<p>基于如上问题，超出需要 10 人开发和维护的项目一般建议的比较合理的做法就是进 行微服务架构设计，把大系统拆分为很多小系统，几个人负责一个服务这样每个服务独立的 开发、测试和上线，代码冲突少了，每次上线就回归测试自己的一个服务即可，测试速度快 了，上线是独立的，只要向后兼容接口就行了，不需要跟别人等待和协调，技术架构和技术 版本的升级，几个人 ok 就行，成本降低，更加灵活了。</p>
+<h3 id="什么是微服务"><a href="#什么是微服务" class="headerlink" title="什么是微服务"></a>什么是微服务</h3><p>微服务架构（MSA）的基础是将单个应用程序开发为一组小型独立服务，这些独立服务 在自己的进程中运行，独立开发和部署。</p>
+<h1 id="Spring-Cloud-Alibaba-解决方案"><a href="#Spring-Cloud-Alibaba-解决方案" class="headerlink" title="Spring Cloud Alibaba 解决方案"></a>Spring Cloud Alibaba 解决方案</h1><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>Spring Cloud Alibaba 是 Spring Cloud 的一个子项目，致力于提供微服务开发的 一站式解决方案。此项目包含开发分布式应用微服务的必需组件，方便开发者通过 Spring  Cloud 编程模型轻松使用这些组件来开发分布式应用服务。</p>
+<p> 依托 Spring Cloud Alibaba，您只需要添加一些注解和少量配置，就可以将 Spring  Cloud 应用接入阿里微服务解决方案，通过阿里中间件来迅速搭建分布式应用系统。</p>
+<h3 id="核心组件"><a href="#核心组件" class="headerlink" title="核心组件"></a>核心组件</h3><p>服务限流降级：默认支持 WebServlet、WebFlux, OpenFeign、RestTemplate、Spring  Cloud Gateway, Dubbo 和 RocketMQ 限流降级功能的接入，可以在运行时通过控 制台实时修改限流降级规则，还支持查看限流降级 Metrics 监控。</p>
+<p>服务注册与发现：基于 Spring Cloud 服务注册与发现标准，借助 Nacos 进行实现， 默认还集成了 Ribbon 的支持。</p>
+<p>分布式配置管理：基于 Nacos 支持分布式系统中的外部化配置，配置更改时自动刷新。</p>
+<p>消息驱动能力：基于 Spring Cloud Stream 为微服务应用构建消息驱动能力。</p>
+<p>分布式事务：使用 @GlobalTransactional 注解， 高效并且对业务零侵入地解决分布 式事务问题。</p>
+<p>分布式任务调度：提供秒级、精准、高可靠、高可用的定时（基于 Cron 表达式）任务 调度服务。同时提供分布式的任务执行模型，如网格任务。网格任务支持海量子任务均 匀分配到所有 Worker（schedulerx-client）上执行。</p>
+<h3 id="解决方案架构设计"><a href="#解决方案架构设计" class="headerlink" title="解决方案架构设计"></a>解决方案架构设计</h3><p><img src="/.io//VUE总结\images\picture2.png"></p>
+<h2 id="服务注册中心-Nacos-应用实践"><a href="#服务注册中心-Nacos-应用实践" class="headerlink" title="服务注册中心 Nacos 应用实践"></a>服务注册中心 Nacos 应用实践</h2><h3 id="背景分析-1"><a href="#背景分析-1" class="headerlink" title="背景分析"></a>背景分析</h3><p>在微服务中，首先需要面对的问题就是如何查找服务，如何在不同的服务之间 进行通信？如何更好更方便的管理应用中的每一个服务，如何建立各个服务之间联 系的纽带，由此注册中心诞生（例如淘宝网卖家提供服务，买家调用服务）。</p>
+<p>市面上常用注册中心有 Zookeeper,Eureka,Nacos,Consul,那他们分别都有什么 特点，我们如何进行选型呢？</p>
+<p>从社区活跃度上分析，consul 和新晋的 nacos 的社区活跃度是比较高的，nacos 可以同时支持 AP 和 CP；consul 则结合了 zookeeper 和 nacos 的诸多优点，还天然 支持多数据中心，而 zookeeper 则又可以唯一感知到服务状态的实时变化；Eurek的自我保护机制使得它即使只剩下一台服务，也不影响正常运行，具有高可用性， 那么选择的时候，究竟应该如何选择呢？需要结合业务场景来进行选择。比如说， 对于金融类的业务场景，对于一致性要求更高，那么就会排除掉 Eureka,然后根据易 用性、性价比等其他方面再进行后续的选择；对于高可用比较注重的项目，如电商 类项目，则可以选择 Eurek 或者 Nacos，但再比较其他方面，Nacos 不仅可以做注 册中心，还可以作为架构中的配置中心，并且社区活跃度比较高，功能也日渐在完 善，使用的人越来越多，因此综合来讲，就选择了 Nacos。</p>
+<h3 id="CAP原则"><a href="#CAP原则" class="headerlink" title="CAP原则"></a>CAP原则</h3><p>CAP原则又称CAP定理，指的是在一个分布式系统中，<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E4%B8%80%E8%87%B4%E6%80%A7/9840083">一致性</a>（Consistency）、<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%8F%AF%E7%94%A8%E6%80%A7/109628">可用性</a>（Availability）、<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%88%86%E5%8C%BA%E5%AE%B9%E9%94%99%E6%80%A7/23734073">分区容错性</a>（Partition tolerance）。CAP 原则指的是，这三个<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E8%A6%81%E7%B4%A0/5261200">要素</a>最多只能同时实现两点，不可能三者兼顾。</p>
+<h2 id="构建Nacos服务"><a href="#构建Nacos服务" class="headerlink" title="构建Nacos服务"></a>构建Nacos服务</h2>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/06/16/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" rel="prev" title="微服务">
+                  <i class="fa fa-chevron-left"></i> 微服务
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sun</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
